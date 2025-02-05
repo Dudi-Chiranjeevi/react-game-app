@@ -12,13 +12,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0  # Ensures correct analysis history
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18  # Ensures npm is available
-          cache: 'npm'       # Enables npm caching for faster builds
+          node-version: 18
+          cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
@@ -28,6 +28,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y wget curl
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh
+          sudo mv ./bin/trivy /usr/local/bin/  # Move to a directory in PATH
+          echo "export PATH=$PATH:/usr/local/bin" >> ~/.bashrc  # Ensure PATH is updated
+          source ~/.bashrc  # Reload shell configuration
           trivy --version  # Verify installation
 
       - name: Trivy File Scan
