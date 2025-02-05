@@ -1,4 +1,4 @@
-name: Build, Analyze, Scan
+name: Build
 on:
   push:
     branches:
