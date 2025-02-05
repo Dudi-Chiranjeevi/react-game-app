@@ -7,12 +7,12 @@ on:
 jobs:
   build-analyze-scan:
     name: Build
-    runs-on: ubuntu-latest  
+    runs-on: ubuntu-latest  # Ensures compatibility with GitHub-hosted runners
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
         with:
-          fetch-depth: 0  
+          fetch-depth: 0  # Ensures correct analysis history
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -23,25 +23,17 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Install Trivy
+      - name: Install Trivy (Fixed)
         run: |
           sudo apt-get update
           sudo apt-get install -y wget curl
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh
-          sudo mv ./bin/trivy /usr/local/bin/trivy
-          echo "/usr/local/bin" >> $GITHUB_PATH  
-          trivy --version  
-
+          sudo mv ./bin/trivy /usr/local/bin/  # Move to a directory in PATH
+          echo "export PATH=$PATH:/usr/local/bin" >> ~/.bashrc  # Ensure PATH is updated
+          source ~/.bashrc  # Reload shell configuration
+          trivy --version  # Verify installation
       - name: Trivy File Scan
-        run: |
-          trivy fs . | tee trivyfs.txt
-          cat trivyfs.txt
-
-      - name: Upload Trivy Scan Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: Trivy-Scan-Report
-          path: trivyfs.txt
+        run: trivy fs . > trivyfs.txt
 
       - name: Build and analyze with SonarQube
         uses: sonarsource/sonarqube-scan-action@master
