@@ -11,7 +11,7 @@ jobs:
     steps:
       # Checkout code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
@@ -41,9 +41,9 @@ jobs:
       - name: Trivy File Scan
         run: trivy fs . > trivyfs.txt
 
-      # Upload Trivy Scan Results as Artifact
+      # Upload Trivy Scan Results as Artifact (Updated version)
       - name: Upload Trivy Scan Results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: trivyfs-scan-results
           path: trivyfs.txt
@@ -54,7 +54,3 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-
-
-          
