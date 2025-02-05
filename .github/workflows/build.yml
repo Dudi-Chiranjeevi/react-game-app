@@ -7,7 +7,7 @@ on:
 jobs:
   build-analyze-scan:
     name: Build
-    runs-on: ubuntu-latest  # Changed from [Linux] to 'ubuntu-latest' for better compatibility
+    runs-on: ubuntu-latest  # Ensures compatibility with GitHub-hosted runners
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -23,11 +23,19 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.1_Linux-64bit.deb
+          sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
+          trivy --version  # Verify installation
+
+      - name: Trivy File Scan
+        run: trivy fs . > trivyfs.txt
+
       - name: Build and analyze with SonarQube
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-      - name: Trivy File Scan
-        run: trivy fs . > trivyfs.txt
