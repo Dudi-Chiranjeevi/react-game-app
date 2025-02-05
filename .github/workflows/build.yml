@@ -46,7 +46,7 @@ jobs:
       - name: Docker Build and push
         run: |
           docker build -t react-game-app .
-          docker tag tic-tac-toe chiranjeeviprac/react-game-app:latest
+          docker tag react-game-app chiranjeeviprac/react-game-app:latest
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
           docker push chiranjeeviprac/react-game-app:latest
           
