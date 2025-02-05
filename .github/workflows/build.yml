@@ -52,3 +52,15 @@ jobs:
           
       - name: Image scan
         run: trivy image chiranjeeviprac/react-game-app:latest > trivyimage.txt
+    
+    
+  deploy:
+    needs: build-analyze-scan
+    runs-on: [Linux]
+    steps:
+      - name: docker pull image
+        run: docker pull chiranjeeviprac/react-game-app:latest
+      - name: Image scan
+        run: trivy image chiranjeeviprac/react-game-app:latest > trivyimagedeploy.txt
+      - name: Deploy to container
+        run: docker run -d --name game -p 3000:3000 chiranjeeviprac/react-game-app:latest
