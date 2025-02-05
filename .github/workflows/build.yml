@@ -17,7 +17,42 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      - name: npm install dependency
-        run: npm install
-      - name: Trivy file scan
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Install dependencies
+      - name: Install Dependencies
+        run: npm ci
+
+      # Install Trivy
+      - name: Install Trivy (Fixed)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget curl
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh
+          sudo mv ./bin/trivy /usr/local/bin/  # Move to a directory in PATH
+          echo "export PATH=$PATH:/usr/local/bin" >> ~/.bashrc  # Ensure PATH is updated
+          source ~/.bashrc  # Reload shell configuration
+          trivy --version  # Verify installation
+
+      # Run Trivy File Scan
+      - name: Trivy File Scan
         run: trivy fs . > trivyfs.txt
+
+      # Upload Trivy Scan Results as Artifact (Updated version)
+      - name: Upload Trivy Scan Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivyfs-scan-results
+          path: trivyfs.txt
+
+      # Build and analyze with SonarQube
+      - name: Build and analyze with SonarQube
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
