@@ -43,3 +43,12 @@ jobs:
       - name: Trivy File Scan
         run: trivy fs . > trivyfs.txt
 
+      - name: Docker Build and push
+        run: |
+          docker build -t react-game-app .
+          docker tag tic-tac-toe chiranjeeviprac/react-game-app:latest
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+          docker push chiranjeeviprac/react-game-app:latest
+          
+      - name: Image scan
+        run: trivy image chiranjeeviprac/react-game-app:latest > trivyimage.txt
